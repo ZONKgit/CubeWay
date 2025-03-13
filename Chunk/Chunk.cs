@@ -12,14 +12,18 @@ namespace CubeWay
         public byte[,,] data;
         public Vector2i position;
         public ChunkRenderer chunkRenderer;
-        private ChunkManager chunkManager;
+        public ChunkManager chunkManager;
+        public ChunkMesh chunkMesh;
+        private bool isUpdatingMesh = false;
+        private bool generationEnded = false;
 
 
         // Конструктор
         public Chunk(Vector2i _position, ChunkManager _chunkManager)
         {
             data = new byte[chunkSize, chunkHeight, chunkSize]; // Выделяем память
-            chunkRenderer = new ChunkRenderer(this);
+            chunkRenderer = new ChunkRenderer();
+            chunkMesh = new ChunkMesh(this);
             position = _position;
             chunkManager = _chunkManager;
 
@@ -45,6 +49,14 @@ namespace CubeWay
                     }
                 }
             }
+            generationEnded = true;
+
+            isUpdatingMesh = true;
+            Task.Run(() => {
+                chunkMesh.GenerateMesh();
+                isUpdatingMesh = false;
+            }
+            );
         }
 
         // Проверка, является ли блок прозрачным (возвращает true для воздуха)
@@ -72,6 +84,17 @@ namespace CubeWay
             return false; // Если chunkManager не инициализирован
         }
 
+        public void UpdateMesh()
+        {
+            if (isUpdatingMesh || generationEnded == false) return; // Не запускаем, если уже идёт обновление
+
+            isUpdatingMesh = true;
+            Task.Run(() =>
+            {
+                chunkMesh.GenerateMesh();
+                isUpdatingMesh = false;
+            });
+        }
 
         public void Render(Shader shader)
         {

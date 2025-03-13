@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using OpenTK.Mathematics;
+using System.Collections.Concurrent;
 
 namespace CubeWay
 {
@@ -12,7 +13,11 @@ namespace CubeWay
         public const int ChunkHeight = 128;
         public FastNoiseLite noise;
         private Dictionary<Vector2i, Chunk> chunks = new(); // Храним чанки по их координатам (2D)
-        public int renderDistance = 8; // Радиус прогрузки чанков в чанках (например, 4 = 9x9 чанков)
+        public int renderDistance = 32; // Радиус прогрузки чанков в чанках (например, 4 = 9x9 чанков)
+        public ConcurrentQueue<Chunk> readyToRenderChunks = new();
+
+
+
 
 
         public ChunkManager()
@@ -29,6 +34,19 @@ namespace CubeWay
 
             LoadChunksAround(playerChunkPos);
             UnloadDistantChunks(playerChunkPos);
+
+            while (readyToRenderChunks.TryDequeue(out Chunk chunk))
+            {
+                List<float> verticesCopy;
+                List<uint> indicesCopy;
+
+                lock (chunk.chunkMesh.meshLock) // Блокируем доступ, пока копируем данные
+                {
+                    verticesCopy = new List<float>(chunk.chunkMesh.vertices);
+                    indicesCopy = new List<uint>(chunk.chunkMesh.indices);
+                    chunk.chunkRenderer.UpdateMesh(verticesCopy, indicesCopy);
+                }
+            }
         }
 
 
@@ -61,7 +79,7 @@ namespace CubeWay
             foreach (Vector2i newChunkCoord in newChunks)
             {
                 // Обновляем меш для нового чанка
-                chunks[newChunkCoord].chunkRenderer.UpdateMesh();
+                chunks[newChunkCoord].UpdateMesh();
 
                 // Обновляем меши для соседних чанков (если они существуют)
                 for (int dx = -1; dx <= 1; dx++)
@@ -73,7 +91,7 @@ namespace CubeWay
                         Vector2i neighborCoord = new Vector2i(newChunkCoord.X + dx, newChunkCoord.Y + dz);
                         if (chunks.ContainsKey(neighborCoord))
                         {
-                            chunks[neighborCoord].chunkRenderer.UpdateMesh();
+                            chunks[neighborCoord].UpdateMesh();
                         }
                     }
                 }
