@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CubeWay", "CubeWay.csproj", "{F686DBC3-2940-4BA9-A68C-A9CE4F53B2B8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F686DBC3-2940-4BA9-A68C-A9CE4F53B2B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F686DBC3-2940-4BA9-A68C-A9CE4F53B2B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F686DBC3-2940-4BA9-A68C-A9CE4F53B2B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F686DBC3-2940-4BA9-A68C-A9CE4F53B2B8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2083DF39-157A-4820-B432-3ACA34F2FF6B}
+	EndGlobalSection
+EndGlobal
