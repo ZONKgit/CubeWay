@@ -40,7 +40,8 @@ namespace CubeWay.Entities.Player
             // Логика смерти игрока
         }
 
-        public Vector3 headOffset = new Vector3(0, -1, 1);
+        public Vector3 headOffset = new Vector3(0, -1, 1.1f);
+        public Vector3 bodyOffset = new Vector3(0, -1.5f, 1);
 
         public override void Update(float deltaTime)
         {
@@ -50,11 +51,15 @@ namespace CubeWay.Entities.Player
 
             headMesh.rotation = Rotation + new Vector3(-90, 90, 0);
             headMesh.position = Position + headOffset;
+
+            bodyMesh.rotation = Rotation + new Vector3(-90, 90, 0);
+            bodyMesh.position = Position + bodyOffset;
         }
 
         public void Render(Shader shader)
         {
             headMesh.Render(shader);
+            bodyMesh.Render(shader);
         }
 
         public void ProcessKeyboard(KeyboardState input, float deltaTime)

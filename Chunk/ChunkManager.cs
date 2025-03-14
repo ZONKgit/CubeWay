@@ -13,8 +13,9 @@ namespace CubeWay
         public const int ChunkHeight = 128;
         public FastNoiseLite noise;
         private Dictionary<Vector2i, Chunk> chunks = new(); // Храним чанки по их координатам (2D)
-        public int renderDistance = 32; // Радиус прогрузки чанков в чанках (например, 4 = 9x9 чанков)
+        public int renderDistance = 8; // Радиус прогрузки чанков в чанках (например, 4 = 9x9 чанков)
         public ConcurrentQueue<Chunk> readyToRenderChunks = new();
+        Queue<Vector2i> chunksToGenerate = new();
 
 
 

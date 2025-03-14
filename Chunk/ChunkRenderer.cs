@@ -65,6 +65,7 @@ namespace CubeWay
             shader.Use();
             GL.BindVertexArray(vao);
             GL.DrawElements(PrimitiveType.Triangles, indicesCount, DrawElementsType.UnsignedInt, 0);
+            GL.BindVertexArray(0);
         }
 
         public void Dispose()

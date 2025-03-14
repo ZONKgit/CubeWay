@@ -112,16 +112,13 @@ public class VoxelMesh
 
     public Matrix4 GetModelMatrix()
     {
-        // Вычисляем геометрический центр модели
-        Vector3 centerOffset = new Vector3(meshSize.X / 2f, meshSize.Y / 2f, meshSize.Z / 2f);
-
-        // Создаем матрицу трансформации с учетом локальной позиции 
-        return Matrix4.CreateTranslation(-centerOffset) *  // Сначала смещаем к центру
+        return Matrix4.CreateTranslation(localPosition) * // Локальная позиция внутри чанка
                Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rotation.Y)) *
                Matrix4.CreateRotationX(MathHelper.DegreesToRadians(rotation.X)) *
                Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(rotation.Z)) *
-               Matrix4.CreateTranslation(position);  // Применяем только позицию без дополнительного смещения
+               Matrix4.CreateTranslation(position);  // Глобальная позиция
     }
+
 
 
 

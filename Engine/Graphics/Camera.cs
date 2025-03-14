@@ -5,6 +5,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 public class Camera
 {
     public Vector3 _position;
+    public Vector3 localPosition = new Vector3(0, 0, 0);
     private Vector3 _front = -Vector3.UnitZ;
     private Vector3 _up = Vector3.UnitY;
     private Vector3 _right;
@@ -16,9 +17,9 @@ public class Camera
 
     public Vector3 Position => _position;
 
-    public Camera(Vector3 position, float aspectRatio)
+    public Camera(Vector3 localPosition, float aspectRatio)
     {
-        _position = position;
+        this.localPosition = localPosition;
         _aspectRatio = aspectRatio;
         UpdateVectors();
     }
@@ -38,6 +39,11 @@ public class Camera
 
     public Matrix4 GetProjectionMatrix() => Matrix4.CreatePerspectiveFieldOfView(
         MathHelper.DegreesToRadians(70f), _aspectRatio, 0.5f, 5000f);
+
+    public void Update()
+    {
+        _position = localPosition;
+    }
 
     public void ProcessKeyboard(KeyboardState input, float deltaTime)
     {

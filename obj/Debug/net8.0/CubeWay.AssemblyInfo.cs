@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CubeWay")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e033bccac541bec84bd4575a2763169936f3731d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2a3831c6a261a421fbf5c1cce64dac37587ac042")]
 [assembly: System.Reflection.AssemblyProductAttribute("CubeWay")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CubeWay")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -32,8 +32,13 @@ public class VoxelMeshRenderer
                 {
                 if (mesh.data[x, y, z] == new VoxelMesh.Color(0, 0, 0)) continue; // Пропуск пустых блоков
 
-                    Vector3 pos = new(x * 0.0625f, y * 0.0625f, z * 0.0625f);
-                        
+                    //Vector3 pos = new(x * 0.0625f - (mesh.meshSize.X/2 * 0.0625f), y * 0.0625f - (mesh.meshSize.Y / 2 * 0.0625f), z * 0.0625f - (mesh.meshSize.Z / 2 * 0.0625f));
+                    //Vector3 pos = new(x * 0.0625f - (mesh.meshSize.X * 0.0625f / 2), y * 0.0625f - (mesh.meshSize.Y * 0.0625f / 2), z * 0.0625f - (mesh.meshSize.Z * 0.0625f / 2));
+                    Vector3 pos = new(
+    ((x - mesh.meshSize.X / 2) * 0.0625f) + (0.0625f / 2.0f) ,
+    ((y - mesh.meshSize.Y / 2) * 0.0625f) + (0.0625f / 2.0f),
+    ((z - mesh.meshSize.Z / 2) * 0.0625f) + (0.0625f / 2.0f)
+);
                     if (mesh.IsVoxelTransparent(x - 1, y, z)) AddFace(pos, new Vector3(-1, 0, 0), x, y, z, ref index); // Левая грань
                     if (mesh.IsVoxelTransparent(x + 1, y, z)) AddFace(pos, new Vector3(1, 0, 0), x, y, z, ref index);  // Правая грань
                     if (mesh.IsVoxelTransparent(x, y, z - 1)) AddFace(pos, new Vector3(0, 0, -1), x, y, z, ref index); // Задняя грань
@@ -45,22 +50,41 @@ public class VoxelMeshRenderer
         }
     }
 
+    // Добавляем метод для определения яркости стороны блока
+    private float GetFaceBrightness(Vector3 normal)
+    {
+        // В Minecraft разные стороны имеют разную базовую яркость
+        if (normal == new Vector3(0, 1, 0)) // Верх
+            return 1.0f;
+        else if (normal == new Vector3(0, -1, 0)) // Низ
+            return 0.6f;
+        else // Боковые стороны
+            return 0.8f;
+    }
+
     // Вычисление значения AO для вершины на основе соседних блоков
     private float CalculateAO(bool side1, bool side2, bool corner)
     {
+        return 1.0f;
+        // Minecraft использует более сложную схему расчета AO
         if (side1 && side2)
-            return 0.0f;
+            return 0.0f; // Максимальное затенение в углу
 
-        float ao = 1.0f;
+        // Счетчик блокирующих блоков
+        int blockers = 0;
+        if (side1) blockers++;
+        if (side2) blockers++;
+        if (corner && !side1 && !side2) blockers++;
 
-        if (side1)
-            ao -= 0.4f;
-        if (side2)
-            ao -= 0.4f;
-        if (corner && !side1 && !side2)
-            ao -= 0.4f;
-
-        return Math.Max(ao, 0.3f); // Минимальное значение AO
+        // Более плавная градация - как в Minecraft
+        switch (blockers)
+        {
+            case 0: return 1.0f;  // Нет блокирующих блоков - полная яркость
+            case 1: return 0.9f;  // Один блокирующий блок - легкое затенение
+            case 2: return 0.8f;  // Два блокирующих блока - среднее затенение
+            case 3: return 0.6f;  // Три блокирующих блока - сильное затенение
+            default: return 1.0f; // На всякий случай
+        }
     }
 
     private void AddFace(Vector3 pos, Vector3 normal, int blockX, int blockY, int blockZ, ref uint index)
@@ -70,6 +94,8 @@ public class VoxelMeshRenderer
 
         VoxelMesh.Color voxelColor = mesh.data[blockX, blockY, blockZ];
         Vector3 color = new Vector3(voxelColor.R, voxelColor.G, voxelColor.B) / 255.0f;
+
+        float brightness = GetFaceBrightness(normal);
 
 
         if (normal == new Vector3(0, 1, 0)) // Верх
@@ -222,14 +248,14 @@ public class VoxelMeshRenderer
         for (int i = 0; i < 4; i++)
         {
             // Вычисляем затемненный цвет на основе базового цвета и AO
-            //color *= aoValues[i];
+            color *= aoValues[i];
 
             faceVertices[i * 7] = pos.X + offsets[i].X * 0.0625f;
             faceVertices[i * 7 + 1] = pos.Y + offsets[i].Y * 0.0625f;
             faceVertices[i * 7 + 2] = pos.Z + offsets[i].Z * 0.0625f;
-            faceVertices[i * 7 + 3] = color.X; // R
-            faceVertices[i * 7 + 4] = color.Y; // G
-            faceVertices[i * 7 + 5] = color.Z; // B
+            faceVertices[i * 7 + 3] = color.X * brightness; // R
+            faceVertices[i * 7 + 4] = color.Y * brightness; // G
+            faceVertices[i * 7 + 5] = color.Z * brightness; // B
             faceVertices[i * 7 + 6] = aoValues[i]; // AO значение (можно использовать в шейдере)
         }
 
@@ -269,6 +295,12 @@ public class VoxelMeshRenderer
         // AO значение (1 float) - если нужно использовать в шейдере
         GL.VertexAttribPointer(2, 1, VertexAttribPointerType.Float, false, 7 * sizeof(float), 6 * sizeof(float));
         GL.EnableVertexAttribArray(2);
+
+        // Normal (3 float)
+        GL.VertexAttribPointer(3, 3, VertexAttribPointerType.Float, false, 10 * sizeof(float), 7 * sizeof(float));
+        GL.EnableVertexAttribArray(3);
+
+        GL.BindVertexArray(0);
     }
 
     public void Render(Shader shader)
@@ -280,6 +312,9 @@ public class VoxelMeshRenderer
 
         Matrix4 model = rotationX * rotationY * rotationZ * translation; // Сначала поворот, потом позиция
         shader.SetMatrix4("model", model);
+
+
+
         shader.Use();
 
         GL.BindVertexArray(vao);
@@ -287,6 +322,7 @@ public class VoxelMeshRenderer
         //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
         GL.DrawElements(PrimitiveType.Triangles, indices.Count, DrawElementsType.UnsignedInt, 0);
         //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+        GL.BindVertexArray(0);
     }
 
     // Метод для обновления меша после изменений в данных чанка
